@@ -57,6 +57,9 @@
       </div>
     </div>
 
+    <div id="balance">
+        <div >Баланс: <b id="balance_count"></b></div>
+    </div>
     <input type="checkbox" id="toggle" data-toggle="toggle" data-on="Мои" data-off="Все">
     <br>
     <div class="container">
@@ -73,15 +76,25 @@
     <script>
 
       var SERVER_API = ""
-      var isTransactionsAll = false
+      var isMyTransactions = false
       var keyOpen = ""
+      var countBalance = 0
 
+      $('#balance').hide()
       getTransactions()
 
       $(function() {
         $('#toggle').change(function() {
-          isTransactionsAll = $(this).prop('checked')
+
+          isMyTransactions = $(this).prop('checked')
+
           getTransactions()
+
+          if(isMyTransactions)
+            $('#balance').show()
+          else
+            $('#balance').hide()
+
         })
       })
 
@@ -91,7 +104,7 @@
 
       function getTransactions() {
         $.ajax({
-          url: SERVER_API + "/chain?open_key=" + keyOpen + "&transactions_all=" + isTransactionsAll,
+          url: SERVER_API + "/chain?open_key=" + keyOpen + "&transactions_my=" + isMyTransactions,
           type: 'GET',
           success: function(response){
 
@@ -99,6 +112,7 @@
             //Generate Transactions Table
             var transactions = [];
             count = 1;
+            countBalance = 0
 
             for (i = 1; i < response.length; i++) {
               for (j = 0; j < response["chain"][i]["transactions"].length; j++) {
@@ -116,6 +130,13 @@
                               response["chain"][i]["block_number"]];
                 transactions.push(transaction);
 
+                if (isMyTransactions) {
+                    if (response["chain"][i]["transactions"][j]["sender_address"] == keyOpen)
+                        countBalance -= response["chain"][i]["transactions"][j]["value"]
+                    else
+                         countBalance += response["chain"][i]["transactions"][j]["value"]
+                }
+
                 count += 1;
               };
             };
@@ -130,6 +151,8 @@
                           { title: "Block"}],
                 columnDefs: [ {targets: [1,2,3,4,5], render: $.fn.dataTable.render.ellipsis( 25 )}]
               } );
+
+              $('#balance_count').html(countBalance)
 
           },
           error: function(error){
