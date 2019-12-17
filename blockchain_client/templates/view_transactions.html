@@ -10,16 +10,15 @@
 
     <title>Blockchain Client</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/vendor/DataTables/css/datatables.min.css" rel="stylesheet">
-    <link href="/static/css/custom.css" rel="stylesheet">
+    <link href="../static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/vendor/DataTables/css/datatables.min.css" rel="stylesheet">
+    <link href="../static/css/custom.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
 
   </head>
 
   <body>
 
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <div class="container">
         <a class="navbar-brand" href="#">Blockchain Client</a>
@@ -45,8 +44,6 @@
       </div>
     </nav>
 
-
-    <!-- Blockchain Node URL Selector -->
     <div class="container">
       <div class="row">
         <div class="col-lg-12">
@@ -60,105 +57,112 @@
       </div>
     </div>
 
-    <div class="container alert alert-secondary">
-
-        <div class="row">
-          <label class="col-sm-2">Node URL:</label>
-          <div class="col-sm-10">
-            <textarea id="node_url" rows="1" class="form-control">http://127.0.0.1:5000</textarea>
-          </div>
-        </div>
-
-        <br>
-
-        <div class="row">
-          <div class="col-lg-12 text-center">
-            <input type="button" id="view_transactions" class="btn btn-primary btn-lg" value="View Transactions">
-          </div>
-        </div>
-
+    <div id="balance">
+        <div >Баланс: <b id="balance_count"></b></div>
     </div>
-
+    <input type="checkbox" id="toggle" data-toggle="toggle" data-on="Мои" data-off="Все">
     <br>
-    <!-- Blockchain Transactions Table -->
     <div class="container">
       <table id="transactions_table" class="table table-striped table-bordered" cellspacing="0" width="100%">
       </table>
     </div>
 
-
-    <!-- Bootstrap core JavaScript -->
-    <script src="/static/vendor/jquery/jquery.min.js"></script>
-    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="/static/vendor/DataTables/js/datatables.min.js"></script>
-    <script src="/static/vendor/DataTables/js/ellipsis.js"></script>
+    <script src="../static/vendor/jquery/jquery.min.js"></script>
+    <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="../static/vendor/DataTables/js/datatables.min.js"></script>
+    <script src="../static/vendor/DataTables/js/ellipsis.js"></script>
 
 
     <script>
 
-      $(function(){
+      var SERVER_API = ""
+      var isMyTransactions = false
+      var keyOpen = ""
+      var countBalance = 0
 
-        
-        $('#view_transactions').click(function(){
+      $('#balance').hide()
+      getTransactions()
 
-          $.ajax({
-            url: document.getElementById("node_url").value + "/chain",
-            type: 'GET',
-            success: function(response){
+      $(function() {
+        $('#toggle').change(function() {
 
-              console.log(response);
-              //Generate Transactions Table
-              var transactions = [];
-              count = 1;
+          isMyTransactions = $(this).prop('checked')
 
-              for (i = 1; i < response.length; i++) { 
-                for (j = 0; j < response["chain"][i]["transactions"].length; j++) {
+          getTransactions()
 
-                  //format date 
-                  var options = {  year: "numeric", month: "short",  day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit"  };
-                  var date = new Date(response["chain"][i]["timestamp"] * 1000);
-                  var formattedDateTime = date.toLocaleTimeString("en-us", options);
+          if(isMyTransactions)
+            $('#balance').show()
+          else
+            $('#balance').hide()
 
-                  transaction = [count,
-                                response["chain"][i]["transactions"][j]["recipient_address"],
-                                response["chain"][i]["transactions"][j]["sender_address"],
-                                response["chain"][i]["transactions"][j]["value"],
-                                formattedDateTime,
-                                response["chain"][i]["block_number"]];
-                  transactions.push(transaction);
-
-                  count += 1;
-                };
-              };
-
-              // Restrict a column to 10 characters, do split words
-                $('#transactions_table').dataTable( {
-                  data: transactions,
-                  columns: [{ title: "#" },
-                            { title: "Recipient Address"},
-                            { title: "Sender Address"},
-                            { title: "Value"},
-                            { title: "Timestamp"},
-                            { title: "Block"}],
-                  columnDefs: [ {targets: [1,2,3,4,5], render: $.fn.dataTable.render.ellipsis( 25 )}]
-                } );
-
-            },
-            error: function(error){
-              console.log(error);
-            }
-          });
-        });
-
-
+        })
       })
 
+      setInterval(function() {
+        getTransactions()
+      }, 10 * 1000)
 
+      function getTransactions() {
+        $.ajax({
+          url: SERVER_API + "/chain?open_key=" + keyOpen + "&transactions_my=" + isMyTransactions,
+          type: 'GET',
+          success: function(response){
 
+            console.log(response);
+            //Generate Transactions Table
+            var transactions = [];
+            count = 1;
+            countBalance = 0
+
+            for (i = 1; i < response.length; i++) {
+              for (j = 0; j < response["chain"][i]["transactions"].length; j++) {
+
+                //format date
+                var options = {  year: "numeric", month: "short",  day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit"  };
+                var date = new Date(response["chain"][i]["timestamp"] * 1000);
+                var formattedDateTime = date.toLocaleTimeString("en-us", options);
+
+                transaction = [count,
+                              response["chain"][i]["transactions"][j]["recipient_address"],
+                              response["chain"][i]["transactions"][j]["sender_address"],
+                              response["chain"][i]["transactions"][j]["value"],
+                              formattedDateTime,
+                              response["chain"][i]["block_number"]];
+                transactions.push(transaction);
+
+                if (isMyTransactions) {
+                    if (response["chain"][i]["transactions"][j]["sender_address"] == keyOpen)
+                        countBalance -= response["chain"][i]["transactions"][j]["value"]
+                    else
+                         countBalance += response["chain"][i]["transactions"][j]["value"]
+                }
+
+                count += 1;
+              };
+            };
+
+              $('#transactions_table').dataTable( {
+                data: transactions,
+                columns: [{ title: "#" },
+                          { title: "Recipient Address"},
+                          { title: "Sender Address"},
+                          { title: "Value"},
+                          { title: "Timestamp"},
+                          { title: "Block"}],
+                columnDefs: [ {targets: [1,2,3,4,5], render: $.fn.dataTable.render.ellipsis( 25 )}]
+              } );
+
+              $('#balance_count').html(countBalance)
+
+          },
+          error: function(error){
+            console.log(error);
+          }
+        });
+      }
 
     </script>
-
-
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 
   </body>
 
