@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 import binascii
+import copy
 
 import Crypto
 import Crypto.Random
@@ -21,10 +22,9 @@ from flask_cors import CORS
 MINING_SENDER = "THE BLOCKCHAIN"
 MINING_REWARD = 1
 MINING_DIFFICULTY = 2
-
+filename = 'transactions/transactions.json'
 
 def write_transaction_to_file(data):
-    filename = 'transactions/transactions.json'
     with open(filename, 'r') as f:
         l_data = json.load(f)
     with open(filename, 'w') as f:
@@ -35,8 +35,9 @@ def write_transaction_to_file(data):
 class Blockchain:
 
     def __init__(self):
-
-        self.transactions = []
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        self.transactions = data['transactions']
         self.chain = []
         self.nodes = set()
         self.node_id = str(uuid4()).replace('-', '')
@@ -84,7 +85,6 @@ class Blockchain:
                  'nonce': nonce,
                  'previous_hash': previous_hash}
 
-        self.transactions = []
 
         self.chain.append(block)
         return block
@@ -199,10 +199,14 @@ def get_transactions():
 
 @app.route('/chain', methods=['GET'])
 def full_chain():
-    response = {
-        'chain': blockchain.chain,
-        'length': len(blockchain.chain),
-    }
+    values = request.args
+    if values['transactions_my']:
+        # TODO return only users transactions
+    else:
+        response = {
+            'chain': blockchain.chain,
+            'length': len(blockchain.chain),
+        }
     return jsonify(response), 200
 
 
