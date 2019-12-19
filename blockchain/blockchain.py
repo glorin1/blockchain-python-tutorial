@@ -203,7 +203,8 @@ def full_chain():
     values = request.args
     chains = copy.deepcopy(blockchain.chain)
     arrayss = []
-    if values['transactions_my']:
+    print(values['transactions_my'])
+    if values['transactions_my'] != 'false':
         for chain in chains:
             transactions = chain['transactions']
             for transaction in transactions:

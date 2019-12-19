@@ -51,8 +51,8 @@
           <div class="card-body">
             <h4 class="card-title">Сгенерировать кошелек</h4>
             <p class="card-text">Я не знаю, что можно здесь написать, но так красивее</p>
-            <button class="btn btn-secondary" onclick="registration()">Регистрация</button>
-            <input type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal" value="Войти">
+            <button class="btn btn-secondary" id="reg" onclick="registration()">Регистрация</button>
+            <input type="button" class="btn btn-secondary" id ="log" data-toggle="modal" data-target="#exampleModal" value="Войти">
           </div>
 
         </div>
@@ -130,30 +130,6 @@
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../static/js/main.js"></script>
-
-
-    <script>
-
-      $(function(){
-        $('input').click(function(){
-
-          $.ajax({
-            url: '/wallet/new',
-            type: 'GET',
-            success: function(response){
-              document.getElementById("private_key").innerHTML = response['private_key'];
-              document.getElementById("public_key").innerHTML = response['public_key'];
-              document.getElementById("warning").style.display = "block";
-            },
-            error: function(error){
-              console.log(error);
-            }
-          });
-        });
-      })
-
-
-    </script>
 
 
 

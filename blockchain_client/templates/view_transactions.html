@@ -10,9 +10,9 @@
 
     <title>Blockchain Client</title>
 
-    <link href="../static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../static/vendor/DataTables/css/datatables.min.css" rel="stylesheet">
-    <link href="../static/css/custom.css" rel="stylesheet">
+    <link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/vendor/DataTables/css/datatables.min.css" rel="stylesheet">
+    <link href="/static/css/custom.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
 
   </head>
@@ -66,40 +66,41 @@
       </table>
     </div>
 
-    <script src="../static/vendor/jquery/jquery.min.js"></script>
-    <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="../static/vendor/DataTables/js/datatables.min.js"></script>
-    <script src="../static/vendor/DataTables/js/ellipsis.js"></script>
+    <script src="/static/vendor/DataTables/js/ellipsis.js"></script>
 
 
     <script>
 
-      var SERVER_API = ""
-      var isMyTransactions = false
-      var keyOpen = ""
-      var countBalance = 0
+      var SERVER_API = "http://127.0.0.1:5000";
+      var isMyTransactions = false;
+      var keyOpen = localStorage.getItem("publicKey");
+      var countBalance = 0;
+      var table;
 
-      $('#balance').hide()
-      getTransactions()
+      $('#balance').hide();
+      getTransactions();
 
       $(function() {
         $('#toggle').change(function() {
 
-          isMyTransactions = $(this).prop('checked')
+          isMyTransactions = $(this).prop('checked');
 
-          getTransactions()
+          getTransactions();
 
           if(isMyTransactions)
-            $('#balance').show()
+            $('#balance').show();
           else
-            $('#balance').hide()
+            $('#balance').hide();
 
         })
       })
 
-      setInterval(function() {
-        getTransactions()
-      }, 10 * 1000)
+      // setInterval(function() {
+      //   getTransactions()
+      // }, 10 * 1000)
 
       function getTransactions() {
         $.ajax({
@@ -111,9 +112,10 @@
             //Generate Transactions Table
             var transactions = [];
             count = 1;
-            countBalance = 0
+            countBalance = 0;
 
-            for (i = 1; i < response.length; i++) {
+            for (i = 0; i < response.length; i++) {
+
               for (j = 0; j < response["chain"][i]["transactions"].length; j++) {
 
                 //format date
@@ -127,31 +129,42 @@
                               response["chain"][i]["transactions"][j]["value"],
                               formattedDateTime,
                               response["chain"][i]["block_number"]];
+                console.log(response["chain"][i]["transactions"][j]["value"])
                 transactions.push(transaction);
 
                 if (isMyTransactions) {
                     if (response["chain"][i]["transactions"][j]["sender_address"] == keyOpen)
-                        countBalance -= response["chain"][i]["transactions"][j]["value"]
+                        countBalance -= response["chain"][i]["transactions"][j]["value"];
                     else
-                         countBalance += response["chain"][i]["transactions"][j]["value"]
+                         countBalance += response["chain"][i]["transactions"][j]["value"];
                 }
 
                 count += 1;
-              };
-            };
-
-              $('#transactions_table').dataTable( {
+              }
+            }
+            console.log(table);
+            if(table == null) {
+              table = $('#transactions_table').dataTable({
                 data: transactions,
-                columns: [{ title: "#" },
-                          { title: "Recipient Address"},
-                          { title: "Sender Address"},
-                          { title: "Value"},
-                          { title: "Timestamp"},
-                          { title: "Block"}],
-                columnDefs: [ {targets: [1,2,3,4,5], render: $.fn.dataTable.render.ellipsis( 25 )}]
-              } );
+                columns: [{title: "#"},
+                  {title: "Recipient Address"},
+                  {title: "Sender Address"},
+                  {title: "Value"},
+                  {title: "Timestamp"},
+                  {title: "Block"}],
+                columnDefs: [{targets: [1, 2, 3, 4, 5], render: $.fn.dataTable.render.ellipsis(25)}]
+              });
+            } else {
+              if(transactions.length > 0) {
+                table.fnClearTable();
+                table.fnAddData(transactions);
+              } else {
+                table.api().clear();
+              }
+              table.api().draw();
+            }
 
-              $('#balance_count').html(countBalance)
+              $('#balance_count').html(countBalance);
 
           },
           error: function(error){

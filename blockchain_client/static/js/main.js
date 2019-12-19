@@ -4,8 +4,7 @@ function registration() {
         publicKey = $("#public_key"),
         result = $('#result-registration');
 
-    $.get('/wallet/new')
-        .done(function (data) {
+    $.get('/wallet/new', function (data) {
             keysBlock.show();
             result.html('Вы успешно зарегистрированы!<br>Сохраните ваши ключи и держите их в тайне!').show();
             privateKey.html(data.private_key);
@@ -27,15 +26,14 @@ function login() {
         password = $("#login-private"),
         result = $('#result-login');
 
-    $.get('/wallet/validate', {public_key: login, private_key: password})
-        .done(function (data) {
+    $.get('/wallet/validate', {public_key: login.val(), private_key: password.val()}, function (data) {
             if (data.success) {
                 localStorage.setItem("publicKey", login.val());
                 localStorage.setItem("privateKey", password.val());
                 //Добавить редирект
                 result.html("Успешно автроизорованы").addClass("alert-success").removeClass("alert-danger").show();
             } else {
-                result.html("Невалидная пара ключей").show();
+                result.html("Невалидная пара ключей").addClass("alert-danger").removeClass("alert-success").show();
             }
         })
 //        .fail(function (data) {
