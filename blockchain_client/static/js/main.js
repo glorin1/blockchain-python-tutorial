@@ -1,8 +1,8 @@
 function loadSession(){
-let privateKey = $("#sender_address"),
-    publicKey = $("#sender_private_key");
+let privateKey = $("#sender_private_key"),
+    publicKey = $("#sender_address");
     privateKey.val(localStorage.getItem('privateKey'));
-    privateKey.val(localStorage.getItem('publicKey'));
+    publicKey.val(localStorage.getItem('publicKey'));
 }
 
 function registration() {

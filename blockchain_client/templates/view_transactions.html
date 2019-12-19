@@ -134,9 +134,9 @@
 
                 if (isMyTransactions) {
                     if (response["chain"][i]["transactions"][j]["sender_address"] == keyOpen)
-                        countBalance -= response["chain"][i]["transactions"][j]["value"];
+                        countBalance -= parseInt(response["chain"][i]["transactions"][j]["value"]);
                     else
-                         countBalance += response["chain"][i]["transactions"][j]["value"];
+                         countBalance += parseInt(response["chain"][i]["transactions"][j]["value"]);
                 }
 
                 count += 1;
@@ -147,11 +147,11 @@
               table = $('#transactions_table').dataTable({
                 data: transactions,
                 columns: [{title: "#"},
-                  {title: "Recipient Address"},
-                  {title: "Sender Address"},
-                  {title: "Value"},
-                  {title: "Timestamp"},
-                  {title: "Block"}],
+                  {title: "Адрес получателя"},
+                  {title: "Адрес отправителя"},
+                  {title: "Количество"},
+                  {title: "Время"},
+                  {title: "Блок"}],
                 columnDefs: [{targets: [1, 2, 3, 4, 5], render: $.fn.dataTable.render.ellipsis(25)}]
               });
             } else {

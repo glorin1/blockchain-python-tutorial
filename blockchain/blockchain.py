@@ -27,16 +27,20 @@ filename = 'chainData/chain.json'
 class Blockchain:
 
     def __init__(self):
-        # with open(filename, 'r') as f:
-        #     data = json.load(f)
+        filedata = self.load_chain_from_file()
         self.transactions = []
-        self.chain = []
-        self.nodes = set()
-        self.node_id = str(uuid4()).replace('-', '')
-        self.create_block(0, '00')
+        self.chain = filedata['chain'] if filedata else []
+        self.nodes = set(filedata['nodes']) if filedata else set()
+        self.node_id = filedata['node_id'] if filedata else str(uuid4()).replace('-', '')
+        if not filedata:
+            self.create_block(0, '00')
 
     def load_chain_from_file(self):
-        pass
+        with open(filename, 'r') as f:
+            # if f.read() == "":
+            #     return False
+            data = json.load(f)
+            return data
 
     def save_chain_in_file(self):
         with open(filename, 'w') as f:
@@ -65,20 +69,21 @@ class Blockchain:
     def submit_transaction(self, sender_address, recipient_address, value, signature):
         transaction = OrderedDict({'sender_address': sender_address, 
                                     'recipient_address': recipient_address,
-                                    'value': value,
-                                    'signature': signature})
+                                    'value': value})
 
         if sender_address == MINING_SENDER:
+
             self.transactions.append(transaction)
             return len(self.chain) + 1
         else:
             transaction_verification = self.verify_transaction_signature(sender_address, signature, transaction)
+            print(transaction_verification)
             if transaction_verification:
-                self.transactions.append(transaction)
-                data = OrderedDict({'sender_address': sender_address,
+                transaction = OrderedDict({'sender_address': sender_address,
                                     'recipient_address': recipient_address,
                                     'value': value,
                                     'signature': signature})
+                self.transactions.append(transaction)
                 return len(self.chain) + 1
             else:
                 return False
@@ -89,10 +94,10 @@ class Blockchain:
                  'transactions': self.transactions,
                  'nonce': nonce,
                  'previous_hash': previous_hash}
-
+        self.transactions = []
         self.chain.append(block)
-        if len(self.chain) > 3:
-            self.save_chain_in_file()
+
+        self.save_chain_in_file()
         return block
 
     def hash(self, block):
@@ -208,14 +213,14 @@ def full_chain():
     values = request.args
     chains = copy.deepcopy(blockchain.chain)
     arrayss = []
-    print(values['transactions_my'])
-    if values['transactions_my'] != 'false':
+    if values.get('transactions_my') and values['transactions_my'] != 'false':
         for chain in chains:
             transactions = chain['transactions']
             for transaction in transactions:
                 if transaction['recipient_address'] == values['open_key'] or transaction['sender_address'] == values['open_key']:
                     arrayss.append(transaction)
             chain['transactions'] = arrayss
+            arrayss = []
     response = {
         'chain': chains,
         'length': len(blockchain.chain),
