@@ -27,8 +27,8 @@ filename = 'chainData/chain.json'
 class Blockchain:
 
     def __init__(self):
-        with open(filename, 'r') as f:
-            data = json.load(f)
+        # with open(filename, 'r') as f:
+        #     data = json.load(f)
         self.transactions = []
         self.chain = []
         self.nodes = set()
@@ -42,7 +42,7 @@ class Blockchain:
         with open(filename, 'w') as f:
             data = {
                 'node_id': self.node_id,
-                'nodes': self.nodes,
+                'nodes': list(self.nodes),
                 'chain': self.chain
             }
             f.write(json.dumps(data, indent=4))
@@ -90,8 +90,9 @@ class Blockchain:
                  'nonce': nonce,
                  'previous_hash': previous_hash}
 
-        self.save_chain_in_file()
         self.chain.append(block)
+        if len(self.chain) > 3:
+            self.save_chain_in_file()
         return block
 
     def hash(self, block):

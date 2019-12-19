@@ -1,0 +1,13 @@
+{
+    "node_id": "d6659a4979664ef3a9a4da64e0a7b0a5",
+    "nodes": [],
+    "chain": [
+        {
+            "block_number": 1,
+            "timestamp": 1576793539.6439595,
+            "transactions": [],
+            "nonce": 0,
+            "previous_hash": "00"
+        }
+    ]
+}
