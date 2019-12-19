@@ -1,3 +1,10 @@
+function loadSession(){
+let privateKey = $("#sender_address"),
+    publicKey = $("#sender_private_key");
+    privateKey.val(localStorage.getItem('privateKey'));
+    privateKey.val(localStorage.getItem('publicKey'));
+}
+
 function registration() {
     let keysBlock = $("#keys-block"),
         privateKey = $("#private_key"),

@@ -205,11 +205,13 @@
     <!-- Bootstrap core JavaScript -->
     <script src="../static/vendor/jquery/jquery.min.js"></script>
     <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/js/main.js"></script>
 
 
     <script>
-
+      loadSession();
       $(function () {
+
           $("#generate_transaction").click(function () {
 
             $.ajax({
@@ -237,6 +239,7 @@
 
 
       $(function () {
+
           $("#button_confirm_transaction").click(function () {
             //console.log($('#confirmation_transaction_form').serialize());
 
