@@ -6,6 +6,7 @@ function registration() {
 
     $.get('/wallet/new')
         .done(function (data) {
+            keysBlock.show();
             result.html('Вы успешно зарегистрированы!<br>Сохраните ваши ключи и держите их в тайне!').show();
             privateKey.html(data.private_key);
             publicKey.html(data.public_key);
