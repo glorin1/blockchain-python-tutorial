@@ -200,13 +200,19 @@ def get_transactions():
 @app.route('/chain', methods=['GET'])
 def full_chain():
     values = request.args
+    chains = copy.deepcopy(blockchain.chain)
+    arrayss = []
     if values['transactions_my']:
-        # TODO return only users transactions
-    else:
-        response = {
-            'chain': blockchain.chain,
-            'length': len(blockchain.chain),
-        }
+        for chain in chains:
+            transactions = chain['transactions']
+            for transaction in transactions:
+                if transaction['recipient_address'] == values['open_key'] or transaction['sender_address'] == values['open_key']:
+                    arrayss.append(transaction)
+            chain['transactions'] = arrayss
+    response = {
+        'chain': chains,
+        'length': len(blockchain.chain),
+    }
     return jsonify(response), 200
 
 
