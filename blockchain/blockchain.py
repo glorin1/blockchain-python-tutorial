@@ -22,26 +22,30 @@ from flask_cors import CORS
 MINING_SENDER = "THE BLOCKCHAIN"
 MINING_REWARD = 1
 MINING_DIFFICULTY = 2
-filename = 'transactions/transactions.json'
-
-def write_transaction_to_file(data):
-    with open(filename, 'r') as f:
-        l_data = json.load(f)
-    with open(filename, 'w') as f:
-        l_data['transactions'].append(data)
-        f.write(json.dumps(l_data, indent=4))
-
+filename = 'chainData/chain.json'
 
 class Blockchain:
 
     def __init__(self):
         with open(filename, 'r') as f:
             data = json.load(f)
-        self.transactions = data['transactions']
+        self.transactions = []
         self.chain = []
         self.nodes = set()
         self.node_id = str(uuid4()).replace('-', '')
         self.create_block(0, '00')
+
+    def load_chain_from_file(self):
+        pass
+
+    def save_chain_in_file(self):
+        with open(filename, 'w') as f:
+            data = {
+                'node_id': self.node_id,
+                'nodes': self.nodes,
+                'chain': self.chain
+            }
+            f.write(json.dumps(data, indent=4))
 
     def register_node(self, node_url):
         parsed_url = urlparse(node_url)
@@ -61,7 +65,8 @@ class Blockchain:
     def submit_transaction(self, sender_address, recipient_address, value, signature):
         transaction = OrderedDict({'sender_address': sender_address, 
                                     'recipient_address': recipient_address,
-                                    'value': value})
+                                    'value': value,
+                                    'signature': signature})
 
         if sender_address == MINING_SENDER:
             self.transactions.append(transaction)
@@ -74,7 +79,6 @@ class Blockchain:
                                     'recipient_address': recipient_address,
                                     'value': value,
                                     'signature': signature})
-                write_transaction_to_file(data)
                 return len(self.chain) + 1
             else:
                 return False
@@ -86,7 +90,7 @@ class Blockchain:
                  'nonce': nonce,
                  'previous_hash': previous_hash}
 
-
+        self.save_chain_in_file()
         self.chain.append(block)
         return block
 
@@ -119,7 +123,7 @@ class Blockchain:
             if block['previous_hash'] != self.hash(last_block):
                 return False
             transactions = block['transactions'][:-1]
-            transaction_elements = ['sender_address', 'recipient_address', 'value']
+            transaction_elements = ['sender_address', 'recipient_address', 'value', 'signature']
             transactions = [OrderedDict((k, transaction[k]) for k in transaction_elements) for transaction in
                             transactions]
 
