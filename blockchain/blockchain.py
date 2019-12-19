@@ -72,7 +72,8 @@ class Blockchain:
                 self.transactions.append(transaction)
                 data = OrderedDict({'sender_address': sender_address,
                                     'recipient_address': recipient_address,
-                                    'value': value})
+                                    'value': value,
+                                    'signature': signature})
                 write_transaction_to_file(data)
                 return len(self.chain) + 1
             else:
