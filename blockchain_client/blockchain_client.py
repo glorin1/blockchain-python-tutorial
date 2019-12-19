@@ -82,6 +82,25 @@ def new_wallet():
 
 	return jsonify(response), 200
 
+@app.route('/wallet/validate', methods=['GET'])
+def validate_wallet():
+    public_key = request.form['public_key']
+    private_key = request.form['private_key']
+
+    private_key = RSA.importKey(binascii.unhexlify(private_key))
+    public_key = RSA.importKey(binascii.unhexlify(public_key))
+
+    signer = PKCS1_v1_5.new(private_key)
+    verifier = PKCS1_v1_5.new(public_key)
+    sign = signer.sign("hello")
+    result = verifier.verify("hello", verifier)
+
+    response = {
+        'success': result
+    }
+
+    return jsonify(response), 200
+
 @app.route('/generate/transaction', methods=['POST'])
 def generate_transaction():
 	

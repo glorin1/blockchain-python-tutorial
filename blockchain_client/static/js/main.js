@@ -6,18 +6,18 @@ function registration() {
 
     $.get('/wallet/new')
         .done(function (data) {
+            result.html('Вы успешно зарегистрированы!<br>Сохраните ваши ключи и держите их в тайне!').show();
             privateKey.html(data.private_key);
             publicKey.html(data.public_key);
-            $("#warning").style.display = "block";
         })
         .fail(function (data) {
-            result.html('Вы успешно зарегистрированы!<br>Сохраните ваши ключи и держите их в тайне!').show();
-            localStorage.setItem("publicKey", 'hjgugkhj');
-            localStorage.setItem("privateKey", 'hjgugkhj');
-            keysBlock.show();
-            privateKey.html('hjgugkhj');
-            publicKey.html("jhgkjhgj");
-            $("#warning").style.display = "block";
+//            result.html('Вы успешно зарегистрированы!<br>Сохраните ваши ключи и держите их в тайне!').show();
+//            localStorage.setItem("publicKey", 'hjgugkhj');
+//            localStorage.setItem("privateKey", 'hjgugkhj');
+//            keysBlock.show();
+//            privateKey.html('hjgugkhj');
+//            publicKey.html("jhgkjhgj");
+//            $("#warning").style.display = "block";
         })
 }
 
@@ -26,15 +26,9 @@ function login() {
         password = $("#login-private"),
         result = $('#result-login');
 
-    $.get('/wallet/validate')
+    $.get('/wallet/validate', {public_key: login, private_key: password})
         .done(function (data) {
-            privateKey.html(data.private_key);
-            publicKey.html(data.public_key);
-            $("#warning").style.display = "block";
-        })
-        .fail(function (data) {
-            //data.success
-            if (true) {
+            if (data.success) {
                 localStorage.setItem("publicKey", login.val());
                 localStorage.setItem("privateKey", password.val());
                 //Добавить редирект
@@ -42,5 +36,16 @@ function login() {
             } else {
                 result.html("Невалидная пара ключей").show();
             }
+        })
+        .fail(function (data) {
+            //data.success
+//            if (true) {
+//                localStorage.setItem("publicKey", login.val());
+//                localStorage.setItem("privateKey", password.val());
+//                //Добавить редирект
+//                result.html("Успешно автроизорованы").addClass("alert-success").removeClass("alert-danger").show();
+//            } else {
+//                result.html("Невалидная пара ключей").show();
+//            }
         })
 }
