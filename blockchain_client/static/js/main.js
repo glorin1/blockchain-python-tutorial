@@ -38,6 +38,7 @@ function login() {
                 localStorage.setItem("publicKey", login.val());
                 localStorage.setItem("privateKey", password.val());
                 //Добавить редирект
+                window.location.href = "/view/transactions";
                 result.html("Успешно автроизорованы").addClass("alert-success").removeClass("alert-danger").show();
             } else {
                 result.html("Невалидная пара ключей").addClass("alert-danger").removeClass("alert-success").show();
